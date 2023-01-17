@@ -5,15 +5,18 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
 const ff = 12;
 const gap = ff * 0.172;
 
+const statements = [];
+
 const rows = [
   ['title A\n tyyt', 'title B'],
   ['sum 1', ''],
   ['sum 2', ''],
 ];
-for (let i = 1; i <= 78; i++) {
+for (let i = 1; i <= 80; i++) {
+  statements.push(i);
   rows.push([
     { text: `row ${i}`, id: i },
-    { text: `row sdf dgfgdfgdfg dfgdfdfgfghfghfghfghdfggd ${i}` },
+    { text: `row sdf dgfgdfgdfg dfgdfdfgfghfghfghfgh-------- ${statements[i-1]}` },
   ]);
 }
 const pagesIndex = [];
@@ -63,9 +66,9 @@ pdfDocGenerator.getBuffer((dataUrl) => {
   rows.splice(1, 2);
   
   pagesIndex.forEach((v, i) => {
-    const s = (pagesIndex[i - 1] ?? 0) + 1;
+    const s = (pagesIndex[i - 1] ?? 0);
     const e = v;
-    const sums = s + ' : ' + e;
+    const sums = statements.slice(s,e).reduce((p, n) => p += n, 0);
     rows.splice(
       v + 2 * i + 1,
       0,
