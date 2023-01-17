@@ -10,7 +10,7 @@ const rows = [
   ['sum 1', ''],
   ['sum 2', ''],
 ];
-for (let i = 1; i <= 80; i++) {
+for (let i = 1; i <= 78; i++) {
   rows.push([
     { text: `row ${i}`, id: i },
     { text: `row sdf dgfgdfgdfg dfgdfdfgfghfghfghfghdfggd ${i}` },
@@ -30,7 +30,6 @@ const docDefinition = {
     previousNodesOnPage
   ) {
     if (currentNode.id) {
-      console.log(currentNode.id, currentNode.pageNumbers);
       const page = currentNode.pageNumbers[0] - 1;
       pagesIndex[page] = currentNode.id;
     }
@@ -49,7 +48,7 @@ const docDefinition = {
   ],
 };
 
-console.log('fontSize: ', ff, ff + gap, heightOfString(), ff * 2.74);
+// console.log('fontSize: ', ff, ff + gap, heightOfString(), ff * 2.74);
 
 const pdfDocGenerator = pdfMake.createPdf(docDefinition);
 pdfDocGenerator.getBuffer((dataUrl) => {
@@ -62,17 +61,15 @@ pdfDocGenerator.getBuffer((dataUrl) => {
 
   console.log(pagesIndex);
   rows.splice(1, 2);
-  const sums = [];
+  
   pagesIndex.forEach((v, i) => {
-    const s = rows
-      .slice((pagesIndex[i - 1] ?? 0) + 2 * i + 1, v +  2 * i + 1)
-      .shift()[0]['id'];
-    const e = rows.slice((pagesIndex[i - 1] ?? 0) + 2 * i + 1, v + 2 * i + 1).pop()[0]['id'];
-    sums[i] = s + ' : ' + e;
+    const s = (pagesIndex[i - 1] ?? 0) + 1;
+    const e = v;
+    const sums = s + ' : ' + e;
     rows.splice(
-      pagesIndex[i] + 2 * i + 1,
+      v + 2 * i + 1,
       0,
-      ['sum 1', sums[i]],
+      ['sum 1', sums],
       ['sum 2', '']
     );
   });
