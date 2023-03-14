@@ -12,14 +12,27 @@ const rows = [
   ['sum 1', ''],
   ['sum 2', ''],
 ];
+
+const rows2 = [
+  ['title A\n tyyt', 'title B'],
+  ['sum 1', ''],
+  ['sum 2', ''],
+];
+
 for (let i = 1; i <= 80; i++) {
   statements.push(i);
+  
   rows.push([
-    { text: `row ${i}`, id: i },
+    { text: `row ${i}`, id: 1 + '_' + i },
+    { text: `row sdf dgfgdfgdfg dfgdfdfgfghfghfghfgh-------- ${statements[i-1]}` },
+  ]);
+
+  rows2.push([
+    { text: `row ${i}`, id: 2 + '_' + i },
     { text: `row sdf dgfgdfgdfg dfgdfdfgfghfghfghfgh-------- ${statements[i-1]}` },
   ]);
 }
-const pagesIndex = [];
+const pagesIndex=[[]];
 
 const docDefinition = {
   pageSize: 'A4',
@@ -34,7 +47,11 @@ const docDefinition = {
   ) {
     if (currentNode.id) {
       const page = currentNode.pageNumbers[0] - 1;
-      pagesIndex[page] = currentNode.id;
+      const split = currentNode.id.split('_');
+
+      const tab = pagesIndex[split[0]] ?? [];
+      tab[page] = +split[1];
+      pagesIndex[split[0]] = tab;
     }
     return false;
   },
@@ -46,7 +63,17 @@ const docDefinition = {
         dontBreakRows: true,
         widths: [50, 100],
         body: rows,
-      },
+      }
+    },
+    {text: 'HHHHHHHHHHHHHHH'},
+    {
+      fontSize: ff,
+      table: {
+        headerRows: 3,
+        dontBreakRows: true,
+        widths: [150, 200],
+        body: rows2,
+      }
     },
   ],
 };
@@ -62,11 +89,11 @@ pdfDocGenerator.getBuffer((dataUrl) => {
   // iframe.src = dataUrl;
   // targetElement.appendChild(iframe);
 
-  console.log(pagesIndex);
+  console.table(pagesIndex);
   rows.splice(1, 2);
   
-  pagesIndex.forEach((v, i) => {
-    const s = (pagesIndex[i - 1] ?? 0);
+  pagesIndex[1].forEach((v, i) => {
+    const s = (pagesIndex[1][i - 1] ?? 0);
     const e = v;
     const sums = statements.slice(s,e).reduce((p, n) => p += n, 0);
     rows.splice(
@@ -77,7 +104,24 @@ pdfDocGenerator.getBuffer((dataUrl) => {
     );
   });
 
+  rows2.splice(1, 2);
+  let ii =-1;
+  pagesIndex[2].forEach((v, i) => {
+    ii++;
+    const s = (pagesIndex[2][i - 1] ?? 0);
+    const e = v;
+    console.log(s,v, ii)
+    const sums = statements.slice(s,e).reduce((p, n) => p += n, 0);
+    rows2.splice(
+      v + 2 * ii + 1,
+      0,
+      ['sum 1', sums],
+      ['sum 2', '']
+    );
+  });
+
   docDefinition.content[0].table.headerRows = 1;
+  docDefinition.content[2].table.headerRows = 1;
   const pdfDocGenerator = pdfMake.createPdf(docDefinition);
   pdfDocGenerator.getDataUrl((dataUrl) => {
     const targetElement = document.getElementById('app');
