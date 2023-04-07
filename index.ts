@@ -19,20 +19,30 @@ const rows2 = [
   ['sum 2', ''],
 ];
 
-for (let i = 1; i <= 80; i++) {
+for (let i = 1; i <= 82; i++) {
   statements.push(i);
-  
+
   rows.push([
     { text: `row ${i}`, id: 1 + '_' + i },
-    { text: `row sdf dgfgdfgdfg dfgdfdfgfghfghfghfgh-------- ${statements[i-1]}` },
+    {
+      text: `row sdf dgfgdfgdfg dfgdfdfgfghfghfghfgh-------- ${
+        statements[i - 1]
+      }`,
+    },
   ]);
+};
 
+for (let i = 1; i <= 50; i++) {
   rows2.push([
     { text: `row ${i}`, id: 2 + '_' + i },
-    { text: `row sdf dgfgdfgdfg dfgdfdfgfghfghfghfgh-------- ${statements[i-1]}` },
+    {
+      text: `row sdf dgfgdfgdfg dfgdfdfgfghfghfghfgh-------- ${
+        statements[i - 1]
+      }`,
+    },
   ]);
 }
-const pagesIndex=[[]];
+const pagesIndex = [[]];
 
 const docDefinition = {
   pageSize: 'A4',
@@ -45,6 +55,19 @@ const docDefinition = {
     nodesOnNextPage,
     previousNodesOnPage
   ) {
+    // if (currentNode.table) {
+    //   const nr = currentNode.startPosition.pageNumber - 1;
+    //   console.log(nr, currentNode, followingNodesOnPage.length);
+    //   // if (nr>0) { 
+    //   //   const t = []; t[nr] = 0;
+    //   //   pagesIndex[2] = t;
+    //   // }
+    //   if (followingNodesOnPage.length <= 5) return true;
+    // }
+    if (currentNode.headlineLevel && followingNodesOnPage.length == currentNode.headlineLevel) {
+      return true;
+    }
+
     if (currentNode.id) {
       const page = currentNode.pageNumbers[0] - 1;
       const split = currentNode.id.split('_');
@@ -53,6 +76,7 @@ const docDefinition = {
       tab[page] = +split[1];
       pagesIndex[split[0]] = tab;
     }
+
     return false;
   },
   content: [
@@ -63,17 +87,18 @@ const docDefinition = {
         dontBreakRows: true,
         widths: [50, 100],
         body: rows,
-      }
+      },
     },
-    {text: 'HHHHHHHHHHHHHHH'},
+    { text: '\n\n\nHHHHHHHHHHHHHHH', fontSize: 14 },
     {
       fontSize: ff,
       table: {
         headerRows: 3,
         dontBreakRows: true,
-        widths: [150, 200],
+        widths: [150, 400],
         body: rows2,
-      }
+      }, 
+      headlineLevel: 5
     },
   ],
 };
@@ -91,33 +116,23 @@ pdfDocGenerator.getBuffer((dataUrl) => {
 
   console.table(pagesIndex);
   rows.splice(1, 2);
-  
+
   pagesIndex[1].forEach((v, i) => {
-    const s = (pagesIndex[1][i - 1] ?? 0);
+    const s = pagesIndex[1][i - 1] ?? 0;
     const e = v;
-    const sums = statements.slice(s,e).reduce((p, n) => p += n, 0);
-    rows.splice(
-      v + 2 * i + 1,
-      0,
-      ['sum 1', sums],
-      ['sum 2', '']
-    );
+    const sums = statements.slice(s, e).reduce((p, n) => (p += n), 0);
+    rows.splice(v + 2 * i + 1, 0, ['sum 1', sums], ['sum 2', '']);
   });
 
   rows2.splice(1, 2);
-  let ii =-1;
-  pagesIndex[2].forEach((v, i) => {
+  let ii = -1;
+  pagesIndex[2]?.forEach((v, i) => {
     ii++;
-    const s = (pagesIndex[2][i - 1] ?? 0);
+    const s = pagesIndex[2][i - 1] ?? 0;
     const e = v;
-    console.log(s,v, ii)
-    const sums = statements.slice(s,e).reduce((p, n) => p += n, 0);
-    rows2.splice(
-      v + 2 * ii + 1,
-      0,
-      ['sum 1', sums],
-      ['sum 2', '']
-    );
+    console.log(s, v, ii);
+    const sums = statements.slice(s, e).reduce((p, n) => (p += n), 0);
+    rows2.splice(v + 2 * ii + 1, 0, ['sum 1', sums], ['sum 2', '']);
   });
 
   docDefinition.content[0].table.headerRows = 1;
